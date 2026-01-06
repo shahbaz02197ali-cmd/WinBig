@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WinBig Pakistan - Official Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #27ae60; --dark: #2c3e50; --bg: #f4f7f6; --jazz: #cb2027; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; }
+        
+        /* Navigation */
+        nav { background: white; padding: 12px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .logo { font-size: 24px; font-weight: 800; color: var(--primary); cursor: pointer; }
+        .nav-right { display: flex; align-items: center; gap: 15px; }
+        .balance-badge { background: #e8f5e9; color: var(--primary); padding: 8px 15px; border-radius: 50px; font-weight: bold; display: none; border: 1px solid var(--primary); }
+
+        /* Pages */
+        .page { display: none; padding: 25px 5%; max-width: 1200px; margin: 0 auto; animation: fadeIn 0.4s; }
+        .active { display: block; }
+        @keyframes fadeIn { from {opacity:0} to {opacity:1} }
+
+        /* Product Cards */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .p-card { background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); position: relative; }
+        .winner-tag { position: absolute; top: 10px; left: 10px; background: gold; color: black; padding: 4px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; }
+        .p-card img { width: 100%; height: 160px; object-fit: cover; border-radius: 10px; }
+        
+        /* UI Elements */
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-green { background: var(--primary); color: white; }
+        .btn-dark { background: var(--dark); color: white; }
+        .btn-wa { background: #25D366; color: white; }
+        
+        .ui-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 500px; margin: auto; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        
+        .deposit-box { background: #fff9c4; padding: 20px; border-radius: 12px; border: 2px dashed #fbc02d; text-align: center; margin-bottom: 20px; }
+        .history-item { background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid var(--primary); text-align: left; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo" onclick="showPage('home')">WinBig.pk</div>
+        <div class="nav-right">
+            <div id="navBal" class="balance-badge">Rs. <span id="userBal">0</span></div>
+            <button class="btn" style="width:auto; background:none;" onclick="showPage('home')">Home</button>
+            <button class="auth-required btn" style="display:none; width:auto; background:none;" onclick="showPage('wallet')">Wallet</button>
+            <button class="auth-required btn" style="display:none; width:auto; background:none;" onclick="showPage('profile')">Profile</button>
+            <button id="loginBtn" class="btn btn-green" style="width:auto; padding:8px 20px" onclick="showPage('login')">Login</button>
+        </div>
+    </nav>
+
+    <div id="home" class="page active">
+        <h2 style="text-align: center; margin-bottom: 30px;">?? Featured Draws (1% Entry Fee)</h2>
+        <div class="grid" id="productGrid"></div>
+    </div>
+
+    <div id="login" class="page">
+        <div class="ui-card">
+            <h2 id="authTitle" style="text-align:center">Sign Up / Login</h2>
+            <input type="text" id="uNameInput" placeholder="Full Name (for Signup)">
+            <input type="text" id="uPhone" placeholder="Mobile Number (03XXXXXXXXX)">
+            <input type="password" placeholder="Password">
+            <button class="btn btn-green" onclick="handleAuth()">Join Now</button>
+        </div>
+    </div>
+
+    <div id="wallet" class="page">
+        <div class="ui-card">
+            <h2 style="text-align:center">Deposit Funds</h2>
+            <div class="deposit-box">
+                <p style="margin:0; font-weight:bold;">JazzCash / Easypaisa</p>
+                <div style="font-size: 26px; font-weight: 900; color: #d32f2f; margin: 10px 0;">03247540414</div>
+                <p style="margin:0; font-size:12px;">Account Title: <b>WinBig Official</b></p>
+            </div>
+            <label>Amount (PKR)</label>
+            <input type="number" id="depAmt" placeholder="Enter Amount">
+            <label>Transaction ID (TID)</label>
+            <input type="text" id="tid" placeholder="Enter 11-digit TID">
+            <button class="btn btn-green" onclick="submitDeposit()">Submit Proof</button>
+        </div>
+    </div>
+
+    <div id="profile" class="page">
+        <div class="ui-card">
+            <div style="text-align:center">
+                <h2 id="displayName">User</h2>
+                <p>Wallet Balance: <b>Rs. <span id="profBal">0</span></b></p>
+            </div>
+            <hr>
+            <h3><i class="fa fa-university"></i> Cash Withdrawal</h3>
+            <input type="number" id="withAmt" placeholder="Amount to Withdraw">
+            <input type="text" id="withPhone" placeholder="Your JazzCash/Easypaisa No.">
+            <button class="btn btn-dark" onclick="alert('Withdrawal request sent to Admin!')">Request Withdrawal</button>
+            
+            <hr>
+            <h3><i class="fa fa-history"></i> Purchase History</h3>
+            <div id="historyList">No entries yet.</div>
+            
+            <button class="btn" style="background:#e74c3c; color:white; margin-top:30px;" onclick="location.reload()">Logout Account</button>
+        </div>
+    </div>
+
+    <script>
+        let balance = 0;
+        let isLogged = false;
+        let userMobile = "";
+        let purchaseHistory = [];
+
+        // 20 Products Data
+        const products = [
+            { id: 1, n: "Honda CG 125 Self", p: 285000, i: "https://images.unsplash.com/photo-1558981403-c5f91cbba527?w=400", w: "0321***441" },
+            { id: 2, n: "iPhone 15 Pro Max", p: 450000, i: "https://images.unsplash.com/photo-1696446701796-da61225697cc?w=400", w: "0300***112" },
+            { id: 3, n: "Cash Prize 100k", p: 100000, i: "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?w=400", w: "0345***990" },
+            { id: 4, n: "Cash Prize 50k", p: 50000, i: "https://images.unsplash.com/photo-1518458082568-d95c65e7a763?w=400", w: "0312***554" },
+            { id: 5, n: "MacBook Air M2", p: 320000, i: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400", w: "0333***771" },
+            { id: 6, n: "Sony 65' 4K LED", p: 180000, i: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400", w: "0301***002" },
+            { id: 7, n: "Apple Watch Ultra 2", p: 240000, i: "https://images.unsplash.com/photo-1546868871-70ca48370731?w=400", w: "0324***414" },
+            { id: 8, n: "Sony PS5 Console", p: 160000, i: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400", w: "0311***223" },
+            { id: 9, n: "Cash Prize 25k", p: 25000, i: "https://images.unsplash.com/photo-1589758438368-0ad531db3366?w=400", w: "0304***881" },
+            { id: 10, n: "Electric Scooter", p: 120000, i: "https://images.unsplash.com/photo-1591485423007-765bde4139ef?w=400", w: "0322***665" },
+            { id: 11, n: "iPad Pro 12.9", p: 310000, i: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400", w: "0305***332" },
+            { id: 12, n: "DSLR Canon EOS", p: 145000, i: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400", w: "0344***111" },
+            { id: 13, n: "Gaming PC Build", p: 250000, i: "https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=400", w: "0320***449" },
+            { id: 14, n: "Gold Necklace", p: 210000, i: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400", w: "0336***772" },
+            { id: 15, n: "Cash Prize 10k", p: 10000, i: "https://images.unsplash.com/photo-1554034483-04fda0d3507b?w=400", w: "0315***998" },
+            { id: 16, n: "Haier Refrigerator", p: 115000, i: "https://images.unsplash.com/photo-1571175432248-ef393863d86b?w=400", w: "0321***661" },
+            { id: 17, n: "Automatic Washer", p: 85000, i: "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=400", w: "0300***550" },
+            { id: 18, n: "Solar Inverter 3KW", p: 190000, i: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=400", w: "0346***229" },
+            { id: 19, n: "Samsung S24 Ultra", p: 395000, i: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400", w: "0331***448" },
+            { id: 20, n: "Cash Prize 5k", p: 5000, i: "https://images.unsplash.com/photo-1607000033170-e11b7146c3d4?w=400", w: "0309***113" }
+        ];
+
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+            products.forEach(p => {
+                let fee = p.p * 0.01; // 1% Fee
+                grid.innerHTML += `
+                    <div class="p-card">
+                        <div class="winner-tag">Last Winner: ${p.w}</div>
+                        <img src="${p.i}">
+                        <div style="font-weight:bold; margin-top:10px; height:40px;">${p.n}</div>
+                        <div style="color:#888; font-size:12px;">Full Value: Rs. ${p.p.toLocaleString()}</div>
+                        <div style="color:var(--primary); font-size:20px; font-weight:800;">Entry: Rs. ${fee.toLocaleString()}</div>
+                        <button class="btn btn-green" onclick="buyTicket(${p.id}, ${fee})">Purchased Now</button>
+                    </div>
+                `;
+            });
+        }
+
+        window.onload = renderProducts;
+
+        function handleAuth() {
+            userMobile = document.getElementById('uPhone').value;
+            if(!userMobile) return alert("Enter Phone Number");
+            isLogged = true;
+            document.getElementById('displayName').innerText = document.getElementById('uNameInput').value || "User";
+            updateUI();
+            showPage('home');
+        }
+
+        function buyTicket(id, fee) {
+            if(!isLogged) return showPage('login');
+            if(balance < fee) {
+                alert("Low Balance! Transfer Rs. " + fee + " to 03247540414.");
+                return showPage('wallet');
+            }
+            if(confirm("Deduct Rs. " + fee + " for this entry?")) {
+                balance -= fee;
+                const p = products.find(x => x.id === id);
+                let tid = "WB" + Math.floor(Math.random()*99999);
+                purchaseHistory.push({ name: p.n, fee: fee, tid: tid });
+                updateUI();
+                alert("Purchased Successfully!");
+            }
+        }
+
+        function submitDeposit() {
+            const amt = parseInt(document.getElementById('depAmt').value);
+            const tid = document.getElementById('tid').value;
+            if(!amt || !tid) return alert("Fill all fields");
+            alert("Verification request sent! Balance will update after admin confirms TID: " + tid);
+            balance += amt; // Added for demo
+            updateUI();
+            showPage('home');
+        }
+
+        function updateUI() {
+            document.getElementById('userBal').innerText = balance;
+            document.getElementById('profBal').innerText = balance;
+            document.getElementById('navBal').style.display = 'block';
+            document.getElementById('loginBtn').style.display = 'none';
+            document.querySelectorAll('.auth-required').forEach(e => e.style.display = 'inline-block');
+            
+            const hList = document.getElementById('historyList');
+            hList.innerHTML = purchaseHistory.map(h => `
+                <div class="history-item">
+                    <b>${h.name}</b><br>
+                    <small>Entry Fee: Rs. ${h.fee} | TID: ${h.tid}</small>
+                    <button class="btn btn-wa" onclick="shareWA('${h.name}', '${h.fee}', '${h.tid}')">
+                        <i class="fab fa-whatsapp"></i> Share Receipt
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function shareWA(name, fee, tid) {
+            let msg = `*WinBig Receipt*%0AItem: ${name}%0AFee: Rs. ${fee}%0ATID: ${tid}%0APhone: ${userMobile}`;
+            window.open(`https://wa.me/923247540414?text=${msg}`);
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            window.scrollTo(0,0);
+        }
+    </script>
+</body>
+</html>
