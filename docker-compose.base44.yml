@@ -1,0 +1,28 @@
+# Base44 development stack.
+#
+# The app is a single static page (index.html) with no build step, so the dev
+# server is nginx serving the working tree directly: no image bakes the source
+# and every edit to index.html is visible on the next page load.
+#
+# Only index.html is mounted (not the repo root) so nginx cannot serve .git or
+# the compose/metadata files from the public preview URL. If the app grows more
+# static assets, add them here or mount the directory instead.
+
+services:
+  web:
+    image: nginx:alpine
+    restart: on-failure
+    ports:
+      - "3000:80"
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/index.html"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    labels:
+      base44.project: "WinBig Pakistan"
+      base44.kind: "web"
+      base44.port: "3000"
